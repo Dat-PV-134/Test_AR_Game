@@ -1,21 +1,14 @@
 package com.rekoj134.argamedemo
 
+import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
-import androidx.camera.view.LifecycleCameraController
-import androidx.camera.view.PreviewView
-import com.rekoj134.argamedemo.databinding.ActivityMainBinding
-import android.Manifest
-import android.content.Intent
 import com.rekoj134.argamedemo.ar_game.ARGameActivity
-import android.content.Context
-import android.view.WindowManager
-import android.view.Gravity
-import android.graphics.PixelFormat
+import com.rekoj134.argamedemo.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -26,7 +19,45 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnStartGame.setOnClickListener {
-            startActivity(Intent(this@MainActivity, ARGameActivity::class.java))
+            requestPermissions()
         }
+    }
+
+    private fun requestPermissions() {
+        activityResultLauncher.launch(REQUIRED_PERMISSIONS)
+    }
+
+    private val activityResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        )
+        { permissions ->
+            // Handle Permission granted/rejected
+            var permissionGranted = true
+            permissions.entries.forEach {
+                if (it.key in REQUIRED_PERMISSIONS && it.value == false)
+                    permissionGranted = false
+            }
+            if (!permissionGranted) {
+                Toast.makeText(
+                    baseContext,
+                    "Permission request denied",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                startActivity(Intent(this@MainActivity, ARGameActivity::class.java))
+            }
+        }
+
+    companion object {
+        private val REQUIRED_PERMISSIONS =
+            mutableListOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO
+            ).apply {
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
+            }.toTypedArray()
     }
 }

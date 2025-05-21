@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ARGameDemo</string>
+    <string name="play">Play</string>
 </resources>

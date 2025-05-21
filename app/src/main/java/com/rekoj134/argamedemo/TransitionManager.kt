@@ -13,10 +13,11 @@ object TransitionManager {
     private var transitionView: TransitionView? = null
     private var windowManager: WindowManager? = null
 
-    fun startTransition(context: Context) {
+    fun startTransition(context: Context, onStartDone:() -> Unit) {
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         transitionView = TransitionView(context).apply {
             onEnd = {
+                onStartDone.invoke()
                 CoroutineScope(Dispatchers.Main).launch {
                     delay(1200)
                     finishTransition()
